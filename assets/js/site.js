@@ -5,6 +5,21 @@ function done(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){
 function save(items){try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}}
 function update(){const completed=done(); document.querySelectorAll('[data-progress-count]').forEach(e=>e.textContent=completed.length+'/10');document.querySelectorAll('[data-progress-fill]').forEach(e=>e.style.width=(completed.length*10)+'%');document.querySelectorAll('[data-unit-number]').forEach(e=>{const id=Number(e.dataset.unitNumber);const label=e.querySelector('.small-status');if(label){label.textContent=completed.includes(id)?'Completed':'Not marked';label.classList.toggle('done',completed.includes(id))}});const mark=document.querySelector('[data-complete-toggle]');if(mark){const id=Number(mark.dataset.completeToggle),ok=completed.includes(id);mark.textContent=ok?'✓ Marked as studied':'Mark lecture as studied';mark.setAttribute('aria-pressed',String(ok))}}
 const mark=document.querySelector('[data-complete-toggle]');if(mark)mark.addEventListener('click',()=>{let a=done(),id=Number(mark.dataset.completeToggle);a=a.includes(id)?a.filter(x=>x!==id):[...a,id];save(a);update()});update();
+// Let students print only the reading notes (or save them as a PDF).
+const notesPanel=document.getElementById('notes');
+if(notesPanel){
+  const notesHeading=notesPanel.querySelector('h2');
+  if(notesHeading){
+    const printButton=document.createElement('button');
+    printButton.type='button';
+    printButton.className='outline-button print-notes-button';
+    printButton.textContent='Print notes';
+    printButton.setAttribute('aria-label','Print lecture notes or save them as a PDF');
+    printButton.setAttribute('title','Print these notes or choose Save as PDF in the print window');
+    notesHeading.insertAdjacentElement('afterend',printButton);
+    printButton.addEventListener('click',()=>window.print());
+  }
+}
 const search=document.querySelector('#lecture-search');if(search){search.addEventListener('input',()=>{const q=search.value.toLowerCase();let shown=0;document.querySelectorAll('.unit-card').forEach(card=>{const visible=card.textContent.toLowerCase().includes(q);card.hidden=!visible;if(visible)shown++});document.querySelector('#search-count').textContent=shown+' lectures shown'})}
 const qroot=document.querySelector('#quiz-root');if(!qroot)return;
 const id=String(qroot.dataset.lecture),pool=(window.COURSE_QUIZZES||{})[id]||[];const count=Math.min(8,pool.length);let questions=[],optionMaps=[];
